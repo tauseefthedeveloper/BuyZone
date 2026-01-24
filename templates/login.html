@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Login
+{% endblock title %}
+{% block content %}
+
+<div class="card bg-light p-3 mt-3">
+
+  {% for message in messages %}
+      <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+        <strong>{{message}}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+      </div>
+      {% endfor %}
+
+  <h3 data-aos="fade-up" class="text-dark" style="font-weight:800;">Login</h3>
+
+  <form action="/auth/login/" method="post" >
+    {% csrf_token %}
+    <br>
+    <label for="email">Email:</label>
+    <div class="form-group">
+      <input type="email" class="form-control" id"email" name="email" required></input>
+    </div>
+    <label for="pass1">Password:</label>
+    <div class="form-group">
+      <input type="password" class="form-control" id"pass1" name="pass1" required></input>
+    </div>
+    <br>
+    <button id="submit-btn" type="submit" class="btn btn-dark">Login</button>
+    <button style="display:none;" class="btn btn-dark" type="button" disabled>
+      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+      SingIn...
+    </button>
+    <br>
+    <br>
+     <span> Forget Password <a href="/auth/request-reset-email/">Reset</a> </span>
+    <br>
+    <br>
+    Don't have account? <a href="/auth/signup/">Sign-Up</a>
+    <br>
+  
+  </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+      /* =========================
+         CART INITIALIZATION
+      ========================== */
+
+      let cart = localStorage.getItem("cart")
+        ? JSON.parse(localStorage.getItem("cart"))
+        : {};
+
+      const cartCount = document.getElementById("cart");
+      const popcart = document.getElementById("popcart");
+
+      const popover = new bootstrap.Popover(popcart, {
+        html: true,
+        trigger: "button",
+        sanitize: false,     // 🔥 REQUIRED for <button>
+        placement: "bottom",
+        content: "Your cart is empty"
+      });
+
+      updateCart(cart);
+
+      /* =========================
+         ADD TO CART
+      ========================== */
+
+      document.addEventListener("click", function (e) {
+        if (!e.target.classList.contains("cart")) return;
+
+        const id = e.target.id; // pr1, pr2
+        const name = document.getElementById("name" + id).innerText;
+        const price = document.getElementById("price" + id).innerText;
+        const oldPrice = document.getElementById("oldprice" + id).innerText;
+        const discount = document.getElementById("discount" + id).innerText;
+
+        if (cart[id]) {
+          cart[id][0]++;
+        } else {
+          cart[id] = [1, name, price, oldPrice, discount];
+        }
+
+        saveCart();
+        updatePopover();
+      });
+
+
+      /* =========================
+         PLUS / MINUS BUTTONS
+      ========================== */
+
+      document.addEventListener("click", function (e) {
+
+        if (e.target.classList.contains("plus")) {
+          const id = e.target.dataset.id;
+          cart[id][0]++;
+        }
+
+        if (e.target.classList.contains("minus")) {
+          const id = e.target.dataset.id;
+          cart[id][0]--;
+
+          // ✅ WHEN QTY BECOMES 0 → REMOVE ITEM & SHOW ADD TO CART
+          if (cart[id][0] <= 0) {
+            delete cart[id];
+
+            const div = document.getElementById("div" + id);
+            if (div) {
+              div.innerHTML = `
+          <button id="${id}" class="btn btn-danger btn-sm w-100 cart">
+            Add To Cart <i class="fa-solid fa-cart-shopping"></i>
+          </button>
+        `;
+            }
+          }
+        }
+
+        saveCart();
+        updatePopover();
+      });
+
+      /* =========================
+         UPDATE CART UI
+      ========================== */
+
+      function updateCart(cart) {
+        let totalQty = 0;
+
+        for (let item in cart) {
+          totalQty += cart[item][0];
+
+          const div = document.getElementById("div" + item);
+          if (!div) continue;
+
+          div.innerHTML = `
+        <button class="btn btn-success btn-sm minus" data-id="${item}">−</button>
+        <span class="mx-2">${cart[item][0]}</span>
+        <button class="btn btn-success btn-sm plus" data-id="${item}">+</button>
+        <a href="/checkout/" class="btn btn-success btn-sm">Checkout</a>
+      `;
+          div.style.display = "flex";
+          div.style.justifyContent = "space-between";
+          div.style.alignItems = "center";
+        }
+
+        cartCount.innerText = totalQty;
+      }
+
+      /* =========================
+         UPDATE POPOVER
+      ========================== */
+      function updatePopover() {
+
+        let html = `<h6>Your Cart</h6><div class="mb-2">`;
+        let i = 1;
+        let hasItems = false;
+
+        for (let item in cart) {
+          if (cart[item][0] > 0) {
+            hasItems = true;
+            html += `<b>${i}.</b> ${cart[item][1].slice(0, 20)}
+        (<b>${cart[item][0]}</b>)<br>`;
+            i++;
+          }
+        }
+
+        // 🚫 No items with quantity > 0
+        if (!hasItems) {
+          popover.hide();
+          return;
+        }
+
+        html += `
+    </div>
+    <a href="/checkout/" class="btn btn-success btn-sm">Checkout</a>
+    <button class="btn btn-danger btn-sm ms-2" onclick="clearCart()">Clear</button>
+  `;
+
+        popover.setContent({ ".popover-body": html });
+        popover.show();
+      }
+
+
+
+      /* =========================
+         SAVE CART
+      ========================== */
+
+      function saveCart() {
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCart(cart);
+      }
+
+      /* =========================
+         CLEAR CART (GLOBAL)
+      ========================== */
+
+      window.clearCart = function () {
+        cart = {};
+        localStorage.removeItem("cart");
+        cartCount.innerText = "0";
+        popover.hide();
+
+        document.querySelectorAll(".divpr").forEach(div => {
+          const id = div.id.replace("div", "");
+          div.innerHTML = `
+        <button id="${id}" class="btn btn-danger btn-sm cart">
+          Add To Cart <i class="fa-solid fa-cart-shopping"></i>
+        </button>
+      `;
+        });
+      };
+    });
+    let submitBtn = document.getElementById("submit-btn");
+      submitBtn.addEventListener("click", function () {
+        submitBtn.style.display = "none";
+        submitBtn.nextElementSibling.style.display = "inline-block";
+      });
+  </script>
+{% endblock content %}

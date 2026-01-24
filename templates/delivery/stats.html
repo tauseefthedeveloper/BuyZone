@@ -1,0 +1,198 @@
+{% extends "delivery/base.html" %}
+{% block main %}
+
+<!-- PAGE TITLE -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fw-bold mb-0">📊 Delivery Summary</h4>
+</div>
+
+<!-- STATS -->
+<div class="row g-3">
+
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card text-center">
+      <div class="stat-title">Total Assigned</div>
+      <div class="stat-value text-primary">{{ total_assigned }}</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card text-center">
+      <div class="stat-title">Delivered</div>
+      <div class="stat-value text-success">{{ delivered_count }}</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card text-center">
+      <div class="stat-title">Pending</div>
+      <div class="stat-value text-warning">{{ pending_count }}</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card text-center">
+      <div class="stat-title">Today Delivered</div>
+      <div class="stat-value text-success">{{ today_delivered }}</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card text-center">
+      <div class="stat-title">Cancelled / Failed</div>
+      <div class="stat-value text-danger">{{ cancelled_count }}</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-4">
+    <div class="card stat-card text-center">
+      <div class="stat-title">Cash Collected</div>
+      <div class="stat-value text-dark">₹ {{ cash_collected }}</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RECENT ORDERS -->
+<div class="card shadow-sm mt-4">
+
+  <div class="card-header fw-semibold">
+    Recent Orders
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="table-responsive d-none d-lg-block">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Status</th>
+          <th>Amount</th>
+          <th>Paid</th>
+          <th>Ordered</th>
+          <th>Delivered / Cancelled</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for order in recent_orders %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+
+          <td>
+            <a href="{% url 'orderDetails' order.oid %}">
+              #{{ order.oid }}
+            </a>
+          </td>
+
+          <td>{{ order.name }}</td>
+
+          <td>
+            {% with latest=order.updates.last %}
+              {% if order.is_refunded %}
+                <span class="badge bg-success">Refund Completed</span>
+              {% elif order.paymentstatus == "Return Completed" %}
+                <span class="badge bg-dark">Return Completed</span>
+              {% elif latest and latest.delivered %}
+                <span class="badge bg-success">Delivered</span>
+              {% elif order.is_returned %}
+                <span class="badge bg-secondary">Return Requested</span>
+              {% elif order.paymentstatus == "Cancelled" %}
+                <span class="badge bg-danger">Cancelled</span>
+              {% elif order.assigned_to %}
+                <span class="badge bg-info">Out for Delivery</span>
+              {% elif order.paymentstatus == "Pending" %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% endif %}
+            {% endwith %}
+          </td>
+
+          <td>₹ {{ order.amount }}</td>
+          <td>₹ {{ order.amountpaid }}</td>
+          <td>{{ order.BookDate|date:"d M Y h:i A" }}</td>
+
+          <td>
+            {% if order.updates.last %}
+              {{ order.updates.last.update_date|date:"d M Y h:i A" }}
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-3">
+            No recent orders
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MOBILE CARDS -->
+  <div class="d-lg-none">
+    {% for order in recent_orders %}
+    <div class="border-bottom p-3">
+
+      <div class="d-flex justify-content-between">
+        <strong>#{{ order.oid }}</strong>
+        <strong>₹ {{ order.amount }}</strong>
+      </div>
+
+      <div class="small text-muted mb-1">{{ order.name }}</div>
+
+      <div class="mb-1">
+        {% with latest=order.updates.last %}
+          {% if latest and latest.delivered %}
+            <span class="badge bg-success">Delivered</span>
+          {% elif order.paymentstatus == "Cancelled" %}
+            <span class="badge bg-danger">Cancelled</span>
+          {% else %}
+            <span class="badge bg-info">In Progress</span>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <div class="small text-muted">
+        Ordered: {{ order.BookDate|date:"d M Y h:i A" }}
+      </div>
+
+      <a href="{% url 'orderDetails' order.oid %}"
+         class="btn btn-outline-secondary btn-sm w-100 mt-2">
+        View Details
+      </a>
+
+    </div>
+    {% empty %}
+      <p class="text-center text-muted py-3">No recent orders</p>
+    {% endfor %}
+  </div>
+
+</div>
+
+<style>
+.stat-card {
+  padding: 16px;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.stat-title {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.card {
+  border-radius: 14px;
+}
+</style>
+
+{% endblock %}

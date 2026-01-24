@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+
+  .success-wrapper {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px 10px;
+    background-color: #646464;
+    color: #fff;
+  }
+
+  .success-card {
+    border-radius: 20px;
+    padding: 35px 28px;
+    max-width: 480px;
+    width: 95%;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.12);
+    animation: fadeSlide .7s ease-in-out;
+  }
+
+  .success-icon {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 15px;
+  }
+
+  .success-title {
+    font-weight: 800;
+    color: #2e7d32;
+  }
+
+  .success-text {
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+
+  .cod-pill {
+    background:#e7f8ee;
+    color:#198754;
+    padding:7px 16px;
+    border-radius:30px;
+    font-weight:700;
+    display:inline-block;
+    margin-top:10px;
+  }
+
+  .order-info {
+    background:#f8f9fa;
+    padding:12px;
+    border-radius:12px;
+  }
+
+  .order-info span {
+    font-weight: 700;
+  }
+
+  .btn-success {
+    border-radius: 30px;
+    padding: 10px 28px;
+    font-weight: 600;
+  }
+
+  .btn-outline-primary {
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-weight: 600;
+  }
+
+  @keyframes fadeSlide {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+{% endblock style %}
+
+{% block title %}BuyZone - Order Success{% endblock title %}
+
+{% block body %}
+
+<div class="success-wrapper d-flex justify-content-center align-items-center mt-3">
+
+  <div class="success-card">
+
+    <div class="d-flex justify-content-center align-items-center">
+        <!-- Animated Success Icon -->
+      <svg class="success-icon" viewBox="0 0 52 52" style="height: 100px;width: 100px; margin-bottom:15px;">
+        <circle cx="26" cy="26" r="25" fill="none" stroke="#28a745" stroke-width="3"></circle>
+        <path d="M16 27l6 6 14-14" fill="none" stroke="#28a745" stroke-width="4"></path>
+      </svg>
+    </div>
+
+    <h3 class="success-title">Order Confirmed!</h3>
+
+    <p class="success-text">
+      Your order has been successfully placed 🎉<br>
+      Our delivery partner will reach you soon.
+    </p>
+
+    <div class="cod-pill">
+      💵 Cash On Delivery
+    </div>
+
+    <hr>
+
+    <div class="order-info text-start mt-2">
+      <p class="mb-1">Order ID: <span class="text-primary">{{ order.oid }}</span></p>
+      <p class="mb-0">Total Amount: <span>₹{{ order.amount }}</span></p>
+    </div>
+
+    <div class="mt-4 mb-4">
+      <a href="/" class="btn btn-success me-2">
+        Continue Shopping
+      </a>
+
+      <a href="{% url 'profile' %}" class="btn btn-outline-primary">
+        View Order
+      </a>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock body %}

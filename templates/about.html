@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us{% endblock title %}
+
+{% block style %}
+#div-container {
+  background: url('/static/images/ImageForWel.webp') no-repeat center;
+  background-size: cover;
+}
+
+.about-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.card {
+  border-radius: 14px;
+}
+{% endblock style %}
+
+{% block content %}
+<h3 data-aos="fade-up"
+    class="text-white fw-bold text-center mt-3">
+    Welcome to About Us!
+</h3>
+{% endblock content %}
+
+{% block body %}
+<div class="container my-4">
+
+    <!-- HERO SECTION -->
+    <div id="div-container"
+         class="text-center text-white py-5 rounded shadow">
+        <h1 class="fw-bold fs-2 fs-md-1">Welcome to BuyZone</h1>
+        <p class="lead fs-6 fs-md-5">
+            Your Ultimate Online Shopping Experience
+        </p>
+    </div>
+
+    <!-- WHO WE ARE -->
+    <section class="my-5 px-2 px-md-4">
+        <h2 class="text-center mb-4">Who We Are</h2>
+
+        <div class="row align-items-center gy-4">
+            <div class="col-12 col-lg-4 text-center">
+                <img src="{% static 'images/logo.png' %}"
+                     alt="BuyZone Logo"
+                     class="about-image rounded shadow">
+            </div>
+
+            <div class="col-12 col-lg-8">
+                <p class="text-muted">
+                    At BuyZone, we believe in transforming your shopping experience
+                    with a simple, fast, and reliable e-commerce platform.
+                </p>
+                <p class="text-muted">
+                    From secure payments to fast delivery, we ensure every purchase
+                    is smooth and stress-free.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="bg-light py-5 rounded px-3 px-md-4">
+        <h2 class="text-center mb-4">Why Choose BuyZone?</h2>
+
+        <div class="row gy-4">
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm text-center p-3">
+                    <i class="bi bi-credit-card-fill fs-1 text-primary"></i>
+                    <h5 class="mt-3">Secure Payments</h5>
+                    <p class="text-muted">
+                        Your transactions are encrypted and safe.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm text-center p-3">
+                    <i class="bi bi-truck fs-1 text-success"></i>
+                    <h5 class="mt-3">Fast Delivery</h5>
+                    <p class="text-muted">
+                        Quick doorstep delivery with live tracking.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm text-center p-3">
+                    <i class="bi bi-box-seam fs-1 text-danger"></i>
+                    <h5 class="mt-3">Wide Selection</h5>
+                    <p class="text-muted">
+                        Top brands & latest trends in one place.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JOURNEY -->
+    <section class="my-5 px-2 px-md-4">
+        <h2 class="text-center mb-4">Our Journey</h2>
+
+        <div class="row align-items-center gy-4">
+            <div class="col-12 col-lg-6">
+                <p class="text-muted">
+                    Founded in 2025, BuyZone started as a small idea and grew
+                    into a trusted shopping destination.
+                </p>
+                <p class="text-muted">
+                    Innovation and customer satisfaction drive everything we do.
+                </p>
+            </div>
+
+            <div class="col-12 col-lg-6 text-center">
+                <img src="{% static 'images/journey.webp' %}"
+                     alt="Our Journey"
+                     class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="bg-light py-5 rounded px-3 px-md-4">
+        <h2 class="text-center mb-4">Contact Us</h2>
+
+        <ul class="list-unstyled text-center fs-6">
+            <li class="mb-2">
+                <i class="bi bi-telephone-fill"></i> +91 14 7650 2389
+            </li>
+            <li class="mb-2">
+                <i class="bi bi-envelope-fill"></i> buyzone@gmail.com
+            </li>
+            <li>
+                <i class="bi bi-geo-alt-fill"></i>
+                Sakinaka, Mumbai 400072, India
+            </li>
+        </ul>
+    </section>
+
+</div>
+
+<!-- CART SCRIPT (UNCHANGED & SAFE) -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    let cart = localStorage.getItem("cart")
+        ? JSON.parse(localStorage.getItem("cart"))
+        : {};
+
+    const cartCount = document.getElementById("cart");
+    const popcart = document.getElementById("popcart");
+
+    const popover = new bootstrap.Popover(popcart, {
+        html: true,
+        trigger: "button",
+        sanitize: false,
+        placement: "bottom",
+        content: "Your cart is empty"
+    });
+
+    updateCart(cart);
+
+    document.addEventListener("click", function (e) {
+        if (!e.target.classList.contains("cart")) return;
+
+        const id = e.target.id;
+        const name = document.getElementById("name" + id).innerText;
+        const price = document.getElementById("price" + id).innerText;
+        const oldPrice = document.getElementById("oldprice" + id).innerText;
+        const discount = document.getElementById("discount" + id).innerText;
+
+        cart[id] ? cart[id][0]++ : cart[id] = [1, name, price, oldPrice, discount];
+        saveCart();
+        updatePopover();
+    });
+
+    function updateCart(cart) {
+        let totalQty = 0;
+        for (let item in cart) totalQty += cart[item][0];
+        cartCount.innerText = totalQty;
+    }
+
+    function saveCart() {
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCart(cart);
+    }
+
+    function updatePopover() {
+        let html = `<h6>Your Cart</h6>`;
+        let i = 1;
+        for (let item in cart) {
+            html += `<b>${i++}.</b> ${cart[item][1]} (${cart[item][0]})<br>`;
+        }
+        html += `<a href="/checkout/?itemsJson=${encodeURIComponent(JSON.stringify(cart))}"
+                 class="btn btn-success btn-sm mt-2">Checkout</a>`;
+        popover.setContent({ ".popover-body": html });
+    }
+});
+</script>
+
+{% endblock body %}

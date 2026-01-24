@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Payment Status{% endblock title %}
+
+{% block body %}
+
+<div class="container mt-4" style="max-width:900px;">
+
+    <!-- PAGE TITLE -->
+    <h2 class="text-center fw-bold mb-4" style="text-decoration: underline red;">
+        Payment Status
+    </h2>
+
+    <!-- DJANGO ALERTS -->
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message }}</strong>
+    </div>
+    {% endfor %}
+
+    <!-- MAIN CARD -->
+    <div class="card shadow border-0" style="border-radius:15px;">
+
+        <div class="card-body p-4">
+
+            <h5 class="text-center fw-bold mb-3">
+                Payment result for Order ID:
+            </h5>
+
+            <p class="text-center text-muted">
+                {{ razorpay_order_id|default:"N/A" }}
+            </p>
+
+            <!-- STATUS BOXES -->
+            {% if status == 'success' %}
+
+            <div class="alert alert-success text-center" style="border-radius:10px;">
+                <h4 class="fw-bold mb-2">🎉 Payment Successful!</h4>
+                <p class="mb-1">Your order has been placed successfully.</p>
+                <p class="mb-1">
+                    <strong>Payment ID:</strong> {{ razorpay_payment_id }}
+                </p>
+            </div>
+
+            {% elif status == 'paid' %}
+
+            <div class="alert alert-success text-center" style="border-radius:10px;">
+                <h4 class="fw-bold mb-2">✔ Payment Already Marked as Paid</h4>
+                <p class="mb-0">Thank you for your payment.</p>
+            </div>
+
+            {% elif status == 'failure' %}
+
+            <div class="alert alert-danger text-center" style="border-radius:10px;">
+                <h4 class="fw-bold mb-2">❌ Payment Failed</h4>
+                <p class="mb-1">
+                    Reason: {{ message|default:"Unknown error" }}
+                </p>
+                <p class="mb-0">If any amount was deducted, it will be refunded.</p>
+            </div>
+
+            {% else %}
+
+            <div class="alert alert-warning text-center" style="border-radius:10px;">
+                <h4 class="fw-bold mb-2">⚠ Payment Status Unknown</h4>
+                <p class="mb-0">Please check your order history or try again.</p>
+            </div>
+
+            {% endif %}
+
+            <!-- BUTTONS -->
+            <div class="text-center mt-4">
+                <a href="/" class="btn btn-primary px-4 py-2" style="border-radius:30px;">
+                    Go to Home
+                </a>
+
+                <a href="{% url 'profile' %}" class="btn btn-outline-secondary px-4 py-2 ms-2"
+                    style="border-radius:30px;">
+                    View Orders
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock body %}

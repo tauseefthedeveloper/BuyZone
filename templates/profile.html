@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load tz %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<h3 class="text-white fw-bold text-center mt-3">
+  Check your Order Summary!
+</h3>
+{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+
+  <!-- FLASH MESSAGES -->
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+      {{ message }}
+      <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+
+  <!-- PROFILE HEADER -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+      <div>
+        <h4 class="mb-1">
+          Hello, <span class="text-danger">{{ user.first_name }} {{ user.last_name }}</span>
+        </h4>
+        <small class="text-muted">Track, cancel or return your orders</small>
+      </div>
+      <span class="badge bg-dark p-3 fs-6 mt-3 mt-md-0">
+        Total Orders : {{ items|length }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ORDERS LIST -->
+  {% for order in items %}
+  {% with latest=order.updates.last %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+      <!-- HEADER -->
+      <div class="row align-items-center mb-3">
+        <div class="col-md-8">
+          <h6 class="fw-bold mb-1">
+            Order ID :
+            <a href="{% url 'order_activity' order.oid %}" class="text-decoration-none">
+              {{ order.oid }}
+            </a>
+          </h6>
+          <small class="text-muted">
+            Ordered on {{ order.BookDate|localtime|date:"M d, Y h:i A" }}
+          </small>
+        </div>
+
+        <!-- STATUS + ACTIONS -->
+        <div class="col-md-4 text-md-end mt-2 mt-md-0">
+
+          <!-- STATUS BADGE (PRIORITY) -->
+          {% if order.is_refunded %}
+            <span class="badge bg-success">Refunded</span>
+          {% elif order.is_returned %}
+            <span class="badge bg-warning text-dark">Return Requested</span>
+          {% elif order.delivered_at %}
+            <span class="badge bg-success">Delivered</span>
+          {% elif order.paymentstatus == "Cancelled" %}
+            <span class="badge bg-danger">Cancelled</span>
+          {% else %}
+            <span class="badge bg-secondary">Pending</span>
+          {% endif %}
+
+          <!-- ACTIONS -->
+          <div class="mt-2">
+
+            <!-- ✅ CANCEL (ONLY BEFORE DELIVERY & BEFORE RETURN) -->
+            {% if not order.delivered_at and not order.is_returned and order.paymentstatus != "Cancelled" %}
+              <a href="{% url 'cancel_order' order.id %}"
+                 class="btn btn-outline-danger btn-sm action-btn"
+                 data-loader="cancel-loader-{{ order.id }}"
+                 onclick="handleAction(this); return confirm('Are you sure you want to cancel this order?');">
+                Cancel
+              </a>
+
+              <button id="cancel-loader-{{ order.id }}"
+                      class="btn btn-outline-danger btn-sm d-none" disabled>
+                <span class="spinner-grow spinner-grow-sm"></span>
+                Cancelling...
+              </button>
+            {% endif %}
+
+            <!-- ✅ RETURN (ONLY AFTER DELIVERY, BEFORE RETURN, WITHIN WINDOW) -->
+            {% if order.delivered_at and not order.is_returned and order.return_allowed %}
+              <a href="{% url 'return_order' order.id %}"
+                 class="btn btn-outline-warning btn-sm action-btn ms-2"
+                 data-loader="return-loader-{{ order.id }}"
+                 onclick="handleAction(this); return confirm('Do you want to request a return?');">
+                Return
+              </a>
+
+              <button id="return-loader-{{ order.id }}"
+                      class="btn btn-outline-warning btn-sm d-none ms-2" disabled>
+                <span class="spinner-grow spinner-grow-sm"></span>
+                Returning...
+              </button>
+
+              <small class="d-block text-muted mt-1">
+                Return available till
+                {{ order.return_allowed_date|localtime|date:"M d, Y" }}
+              </small>
+
+            {% elif order.delivered_at and not order.return_allowed %}
+              <small class="d-block text-muted mt-1">
+                Return period expired
+              </small>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- BODY -->
+      <div class="row">
+        <div class="col-md-7">
+          <h6 class="fw-bold">Items</h6>
+          {% for key,value in order.products.items %}
+            <div>
+              <strong>{{ value.1 }}</strong>
+              {% if value.5 %}
+                <small class="text-muted">(Size: {{ value.5 }})</small>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+          {% if order.amountpaid == 0 %}
+            <span class="badge bg-warning text-dark">Cash on Delivery</span>
+          {% else %}
+            <span class="badge bg-success">Paid</span>
+          {% endif %}
+
+          <h4 class="fw-bold text-danger mt-2">₹ {{ order.amount }}</h4>
+
+          {% if latest %}
+            <small class="text-muted">
+              Last updated {{ latest.update_date|localtime|date:"M d, Y h:i A" }}
+            </small>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+  {% endwith %}
+  {% empty %}
+    <p class="text-center text-muted">
+      No orders found. <a href="/">Start shopping</a>
+    </p>
+  {% endfor %}
+</div>
+
+<!-- ONE GLOBAL SCRIPT -->
+<script>
+function handleAction(btn) {
+  const loader = document.getElementById(btn.dataset.loader);
+  if (!loader) return;
+  btn.classList.add("d-none");
+  loader.classList.remove("d-none");
+}
+</script>
+{% endblock %}

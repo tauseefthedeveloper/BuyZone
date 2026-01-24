@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %} Contact {% endblock title %}
+
+{% block content %}
+<h3
+  data-aos="fade-up"
+  class="text-white font-weight-bold text-center"
+  style="width: 100%; font-weight: 800"
+>
+  Welcome to Contact us!
+</h3>
+ {% endblock content %}
+
+
+{% block body %}
+
+<h2 class="text-center mt-3">Contact Us</h2>
+
+<div class="container">
+
+    {% for message in messages %}
+        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+            <strong>{{message}}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+        </div>
+        {% endfor %}
+
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+                
+                <form action="/contact/" method="post" >
+                  {% csrf_token %}
+                  <br>
+                  <label for="name">Full name:</label>
+                  <div class="form-group">
+                    <input type="text" value="{{user.first_name}}" class="form-control" id="name" name="name" required></input>
+                  </div>
+                  <label for="email">Email:</label>
+                  <div class="form-group">
+                    <input type="email" value="{{user.email}}" class="form-control" id="email" name="email" required></input>
+                  </div>
+                  <label for="desc">How can i help You?</label>
+                  <div class="form-group">
+                    <textarea type="text" class="form-control" id="desc" name="desc" required></textarea>
+                  </div>
+                  <label for="number">Phone Number:</label>
+                  <div class="form-group">
+                    <input type="number" value={{order.phone}} class="form-control" id="number" name="number" required></input>
+                  </div>
+                  <br>
+                  <button type="submit" class="btn btn-dark">Submit</button>    
+                  <br>
+                  <br>
+                  <br>
+                </form>
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+
+</div>
+<script>
+  if (localStorage.getItem('cart') == null) {
+    var cartItems = {};
+    updateCart(cartItems)
+} else {
+    var cartItems = JSON.parse(localStorage.getItem('cart'));
+    updateCart(cartItems);
+}
+function updateCart(cartItems){
+  var sum=0;
+  for(var item in cartItems){
+    document.getElementById('car')
+    sum = sum + cartItems[item][0];
+  }
+  localStorage.setItem('cart', JSON.stringify(cartItems));
+  document.getElementById('cart').innerHTML = sum;
+}
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        /* =========================
+           CART INITIALIZATION
+        ========================== */
+
+        let cart = localStorage.getItem("cart")
+            ? JSON.parse(localStorage.getItem("cart"))
+            : {};
+
+        const cartCount = document.getElementById("cart");
+        const popcart = document.getElementById("popcart");
+
+        const popover = new bootstrap.Popover(popcart, {
+            html: true,
+            trigger: "button",     // SAME AS INDEX PAGE
+            sanitize: false,       // REQUIRED because we inject HTML
+            placement: "bottom",
+            content: "Your cart is empty"
+        });
+
+        updateCart(cart);
+
+
+        /* =========================
+           ADD TO CART
+        ========================== */
+
+        document.addEventListener("click", function (e) {
+
+            if (!e.target.classList.contains("cart")) return;
+
+            const id = e.target.id;
+            const name = document.getElementById("name" + id).innerText;
+            const price = document.getElementById("price" + id).innerText;
+            const oldPrice = document.getElementById("oldprice" + id).innerText;
+            const discount = document.getElementById("discount" + id).innerText;
+
+            if (cart[id]) {
+                cart[id][0]++;
+            } else {
+                cart[id] = [1, name, price, oldPrice, discount];
+            }
+
+            saveCart();
+            updatePopover();
+        });
+
+
+
+        /* =========================
+           UPDATE CART BUTTON UI
+        ========================== */
+
+        function updateCart(cart) {
+            let totalQty = 0;
+
+            for (let item in cart) {
+                totalQty += cart[item][0];
+
+                const div = document.getElementById("div" + item);
+                if (!div) continue;
+
+                div.innerHTML = `
+        <button class="btn btn-success btn-sm minus" data-id="${item}">−</button>
+        <span class="mx-2">${cart[item][0]}</span>
+        <button class="btn btn-success btn-sm plus" data-id="${item}">+</button>
+        <a href="/checkout/?itemsJson=${encodeURIComponent(JSON.stringify(cart))}" class="btn btn-success btn-sm">Checkout</a>
+      `;
+
+                div.style.display = "flex";
+                div.style.justifyContent = "space-between";
+                div.style.alignItems = "center";
+                div.style.width="100%";
+            }
+
+            cartCount.innerText = totalQty;
+        }
+
+
+
+        /* =========================
+           PLUS / MINUS BUTTONS
+        ========================== */
+
+        document.addEventListener("click", function (e) {
+
+            if (e.target.classList.contains("plus")) {
+                const id = e.target.dataset.id;
+                cart[id][0]++;
+            }
+
+            if (e.target.classList.contains("minus")) {
+                const id = e.target.dataset.id;
+                cart[id][0]--;
+
+                if (cart[id][0] <= 0) {
+                    delete cart[id];
+
+                    const div = document.getElementById("div" + id);
+                    if (div) {
+                        div.innerHTML = `
+            <button id="${id}" style="width:100%;" class="btn btn-danger btn-sm cart">
+              Add To Cart <i class="fa-solid fa-cart-shopping"></i>
+            </button>
+          `;
+                    }
+                }
+            }
+
+            saveCart();
+            updatePopover();
+        });
+
+
+
+        /* =========================
+           UPDATE POPOVER CONTENT
+        ========================== */
+
+        function updatePopover() {
+
+            let html = `<h6>Your Cart</h6><div class="mb-2">`;
+            let i = 1;
+            let hasItems = false;
+
+            for (let item in cart) {
+                if (cart[item][0] > 0) {
+                    hasItems = true;
+                    html += `<b>${i}.</b> ${cart[item][1].slice(0, 20)} (<b>${cart[item][0]}</b>)<br>`;
+                    i++;
+                }
+            }
+
+            if (!hasItems) {
+                popover.hide();
+                return;
+            }
+
+            html += `
+      </div>
+      <a href="/checkout/?itemsJson=${encodeURIComponent(JSON.stringify(cart))}" class="btn btn-success btn-sm">Checkout</a>
+      <button class="btn btn-danger btn-sm ms-2" onclick="clearCart()">Clear</button>
+    `;
+
+            popover.setContent({ ".popover-body": html });
+            popover.show();
+        }
+
+
+
+        /* =========================
+           SAVE CART
+        ========================== */
+
+        function saveCart() {
+            localStorage.setItem("cart", JSON.stringify(cart));
+            updateCart(cart);
+        }
+
+
+
+        /* =========================
+           CLEAR CART (GLOBAL)
+        ========================== */
+
+        window.clearCart = function () {
+            cart = {};
+            localStorage.removeItem("cart");
+            cartCount.innerText = "0";
+            popover.hide();
+
+            document.querySelectorAll(".divpr").forEach(div => {
+                const id = div.id.replace("div", "");
+                div.innerHTML = `
+        <button id="${id}" style="width:100%;" class="btn btn-danger btn-sm cart">
+          Add To Cart  <i class="fa-solid fa-cart-shopping"></i>
+        </button>
+      `;
+            });
+        };
+
+    });
+</script>
+{% endblock body %}

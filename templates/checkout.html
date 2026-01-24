@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+{% block title %}
+Check Out
+{% endblock title %}
+{% block style %}
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+-moz-appearance: textfield;
+}
+{% endblock style %}
+{% block content %}
+<h3>Fill your address and pay the payment of your order!</h3>
+{% endblock content %}
+{% block body %}
+{% load static %}
+
+<!-- ======= Portfolio Section ======= -->
+<section id="portfolio" class="portfolio">
+  <div class="container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      <strong>{{ message }}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="section-title">
+      <h2>Welcome to Shop</h2>
+      <h3 class="mt-3">Checkout Page </h3>
+    </div>
+
+    <div class="container">
+      <div class="col my-4">
+        <h2>Step 1 - My Awesome Cart Express Checkout - Review Your Cart Items</h2>
+        <div class="my-4">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+              <thead class="text-center">
+                <tr>
+                  <th>Name</th>
+                  <th>New Price</th>
+                  <th>Old Price</th>
+                  <th>Discount</th>
+                  <th>Select Size</th>
+                  <th style="width:170px;">Quantity</th>
+                  <th>Remove</th>
+                </tr>
+              </thead>
+              <tbody id="items">
+                <!-- JS will inject rows here -->
+              </tbody>
+            </table>
+          </div>
+
+          </ul>
+
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mt-3">
+              <li class="breadcrumb-item active" aria-current="page">Your Cart Total Is <b>Rs. <span
+                    id="totalprice"></span></b>. Enter your details below & place your order. Thanks for using
+                <b> BuyZone</b>
+              </li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+      <div class="col my-4">
+
+        <div class="card shadow-lg border-0">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Step 2 — Enter Address & Other Details</h4>
+          </div>
+
+          <div class="card-body p-4">
+
+            <form id="checkout-form" method="post" action="{% url 'checkout' %}">
+              {% csrf_token %}
+              <input type="hidden" name="itemsJson" id="itemsJson">
+              <input type="hidden" id="amt" name="amt">
+
+              <!-- Row 1 -->
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" value="{{ user.first_name }}" id="name" name="name"
+                    placeholder="Enter your name" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" value="{{ user.email }}" id="email" name="email"
+                    placeholder="Enter your email" required>
+                </div>
+              </div>
+
+              <!-- Row 2 -->
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label">Address Line 1</label>
+                  <input type="text" class="form-control" value="{{OrderDetails.address1 }}" id="address1"
+                    name="address1" placeholder="Flat / House / Building" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Address Line 2</label>
+                  <input type="text" class="form-control" value="{{ OrderDetails.address2 }}" id="address2"
+                    name="address2" placeholder="Area / Locality / Landmark">
+                </div>
+              </div>
+
+              <!-- Row 3 -->
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label">City</label>
+                  <input type="text" class="form-control" value="{{ OrderDetails.city }}" id="city" name="city"
+                    required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">State</label>
+                  <input type="text" class="form-control" value="{{ OrderDetails.state }}" id="state" name="state"
+                    placeholder="Enter your state" required>
+                </div>
+              </div>
+
+              <!-- Row 4 -->
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label">Pin Code</label>
+                  <input type="number" class="form-control" value="{{ OrderDetails.zip_code }}" id="zip_code"
+                    name="zip_code" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Phone Number</label>
+                  <input type="number" class="form-control" value="{{ OrderDetails.phone }}" id="phone" name="phone"
+                    required>
+                </div>
+              </div>
+
+              <!-- Payment -->
+              <div class="mt-3">
+                <label class="form-label">Payment Method</label>
+
+                <div class="card p-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" id="razorpay" name="payment_method" value="razorpay"
+                      checked>
+                    <label class="form-check-label" for="razorpay">
+                      UPI / BHIM / Credit & Debit Card
+                    </label>
+                  </div>
+
+                  <div class="form-check mt-2">
+                    <input class="form-check-input" type="radio" id="cod" name="payment_method" value="cod">
+                    <label class="form-check-label" for="cod">
+                      Cash on Delivery
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <div class="text-end mt-4">
+                <button id="btn" type="submit" class="btn btn-success  btn-lg px-4">Place Order</button>
+                 <button style="display:none;" class="btn btn-success btn-lg px-4" type="button" disabled>
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                    Placing Order...
+                  </button>
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+      integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+      integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+      crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+      integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+      crossorigin="anonymous"></script>
+    <script>
+      const variants_map = JSON.parse('{{ variants_map_json|escapejs }}');
+    </script>
+    <script>
+      let button=document.getElementById("btn");
+      button.onclick=function(){
+        button.style.display="none";
+        button.nextElementSibling.style.display="inline-block";
+      }
+
+      document.getElementById("itemsJson").value =
+      new URLSearchParams(window.location.search).get("itemsJson");
+      document.addEventListener("DOMContentLoaded", function () {
+
+        /* =========================
+           CART INITIALIZATION
+        ========================== */
+        let cart = localStorage.getItem("cart")
+            ? JSON.parse(localStorage.getItem("cart"))
+            : {};
+
+        function checkReady() {
+            if (document.querySelector(".out-of-stock")) {
+                document.getElementById("btn").disabled = true;
+                return;
+            }
+
+            const selects = document.querySelectorAll(".size-select");
+            for (let s of selects) {
+                if (!s.value) {
+                    document.getElementById("btn").disabled = true;
+                    return;
+                }
+            }
+
+            document.getElementById("btn").disabled = false;
+        }
+
+
+        document.addEventListener("change", function(e){
+
+            if(!e.target.classList.contains("size-select")) return;
+
+            const pid = "pr" + e.target.dataset.product;
+            const sizeName = e.target.value;
+
+            if(cart[pid]) {
+
+                // store size at index 5
+                cart[pid][5] = sizeName;
+
+                // persist
+                localStorage.setItem("cart", JSON.stringify(cart));
+
+                // update hidden field
+                document.getElementById("itemsJson").value = JSON.stringify(cart);
+            }
+
+            checkReady();
+        });
+
+
+        const cartCount = document.getElementById("cart");
+        const popcart = document.getElementById("popcart");
+
+        // Popover
+        const popover = new bootstrap.Popover(popcart, {
+          html: true,
+          trigger: "button",
+          sanitize: false,
+          placement: "bottom",
+          content: "Your cart is empty"
+        });
+
+
+        /* =========================
+           MAIN HELPERS
+        ========================== */
+
+        function saveCart() {
+          localStorage.setItem("cart", JSON.stringify(cart));
+        }
+
+        function updateNavbarCartUI() {
+          let totalQty = 0;
+
+          for (let item in cart) totalQty += cart[item][0];
+
+          cartCount.innerText = totalQty;
+
+          // update product cards (if visible)
+          for (let item in cart) {
+            const div = document.getElementById("div" + item);
+            if (!div) continue;
+
+            div.innerHTML = `
+        <button class="btn btn-success btn-sm minus" data-id="${item}">−</button>
+        <span class="mx-2">${cart[item][0]}</span>
+        <button class="btn btn-success btn-sm plus" data-id="${item}">+</button>
+        <a href="/checkout/" class="btn btn-success btn-sm">Checkout</a>
+      `;
+
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+          }
+        }
+
+
+        /* =========================
+           CHECKOUT PAGE UI
+        ========================== */
+
+        function updateCheckoutUI() {
+
+          if (!document.getElementById("items")) return; // not on checkout page
+
+          let totalPrice = 0;
+          $("#items").empty();
+
+          if ($.isEmptyObject(cart)) {
+            $("#items").append(`
+              <tr>
+                <td colspan="7" class="text-center text-danger fw-bold">Your cart is empty, please add some items</td>
+              </tr>
+            `);
+          }
+          else {
+            for (let item in cart) {
+
+              let name = cart[item][1];
+              let qty = cart[item][0];
+              let price = cart[item][2];
+              let oldPrice = cart[item][3];
+              let discount = cart[item][4];
+
+              totalPrice += qty * price;
+
+              $('#items').append(`
+              <tr class="text-center" data-item="${item}">
+                <td><b>${name}</b></td>
+
+                <td>
+                  <span class="fw-bold text-success">₹${price}</span>
+                </td>
+
+                <td>
+                  <span class="text-danger" style="text-decoration:line-through;">
+                    ₹${oldPrice}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="text-danger">
+                    ${discount}%
+                  </span>  
+                </td>
+                <td>
+                    {% verbatim %}
+                    ${(() => {
+                  const pid = parseInt(item.replace("pr", ""));
+                  const variants = variants_map[pid.toString()];
+                  const current = cart["pr"+pid][5] || "";
+                  if (!variants || variants.length === 0) {
+                    return `<span class="text-danger out-of-stock">Out of stock</span>`;
+                  }
+
+                  return `
+                          <select class="form-select size-select" data-product="${pid}" required>
+                              <option value="" selected disabled>Select size</option>
+                              ${variants.map(v =>
+                              `<option value="${v.size__name}" ${current===v.size__name ? "selected" : ""}>
+                                    ${v.size__name} — In stock (${v.stock})
+                              </option>`
+                  ).join("")
+                    }
+                          </select>`;
+                })()}
+                    {% endverbatim %}
+                  </td>
+
+                <td>
+                  <div class="d-flex justify-content-center align-items-center">
+
+                    <button class="btn btn-outline-danger btn-sm qty-minus me-2"
+                            data-item="${item}">
+                      −
+                    </button>
+
+                    <span class="fw-bold">${qty}</span>
+
+                    <button class="btn btn-outline-success btn-sm qty-plus ms-2"
+                            data-item="${item}">
+                      +
+                    </button>
+
+                  </div>
+                </td>
+
+                <td>
+                  <button class="btn btn-danger btn-sm remove-item"
+                          data-item="${item}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              `);
+            }
+          }
+
+          $("#totalprice").text(totalPrice);
+          $("#itemsJson").val(JSON.stringify(cart));
+          $("#amt").val(totalPrice);
+        }
+
+
+        /* =========================
+           POPOVER CONTENT
+        ========================== */
+
+        function updatePopover() {
+
+          let html = `<h6>Your Cart</h6><div class="mb-2">`;
+          let i = 1;
+          let has = false;
+
+          for (let item in cart) {
+            if (cart[item][0] > 0) {
+              has = true;
+              html += `<b>${i}.</b> ${cart[item][1].slice(0, 20)} (<b>${cart[item][0]}</b>)<br>`;
+              i++;
+            }
+          }
+
+          if (!has) {
+            popover.hide();
+            return;
+          }
+
+          html += `
+      </div>
+      <a href="/checkout/?itemsJson=${encodeURIComponent(JSON.stringify(cart))}" class="btn btn-success btn-sm">Checkout</a>
+      <button class="btn btn-danger btn-sm ms-2" onclick="clearCart()">Clear</button>
+    `;
+
+          popover.setContent({ ".popover-body": html });
+
+        }
+
+
+        /* =========================
+           ADD TO CART BUTTON
+        ========================== */
+
+        document.addEventListener("click", function (e) {
+          if (e.target.tagName === "SELECT" || e.target.tagName === "OPTION") {
+            return;
+          }
+          if (e.target.closest("SELECT") || e.target.closest("OPTION")) {
+            return;
+          }
+          if (!e.target.classList.contains("cart")) return;
+
+          const id = e.target.id;
+          const name = document.getElementById("name" + id).innerText;
+          const price = document.getElementById("price" + id).innerText;
+          const old = document.getElementById("oldprice" + id).innerText;
+          const disc = document.getElementById("discount" + id).innerText;
+
+          if (cart[id]) cart[id][0]++;
+          else cart[id] = [1, name, price, old, disc];
+
+          saveCart();
+          updateNavbarCartUI();
+          updateCheckoutUI();
+          updatePopover();
+        });
+
+
+        /* =========================
+           PLUS / MINUS — GLOBAL
+        ========================== */
+
+        document.addEventListener("click", function (e) {
+          if (e.target.closest("select") || e.target.closest("option")) return;
+
+          const isCartAction =
+            e.target.closest(".plus") ||
+            e.target.closest(".minus") ||
+            e.target.closest(".qty-plus") ||
+            e.target.closest(".qty-minus") ||
+            e.target.closest(".remove-item") ||
+            e.target.closest(".cart");
+          // 🔥 if click is NOT a cart action — DO NOTHING
+          if (!isCartAction) return;
+          // nav popover / product card +
+          if (e.target.classList.contains("plus")) {
+            const id = e.target.dataset.id;
+            cart[id][0]++;
+          }
+
+          // nav popover / product card −
+          if (e.target.classList.contains("minus")) {
+            const id = e.target.dataset.id;
+            cart[id][0]--;
+            if (cart[id][0] <= 0) delete cart[id];
+          }
+
+          // checkout page +
+          if (e.target.classList.contains("qty-plus")) {
+            const id = e.target.dataset.item;
+            cart[id][0]++;
+          }
+
+          // checkout page −
+          if (e.target.classList.contains("qty-minus")) {
+            const id = e.target.dataset.item;
+            cart[id][0]--;
+            if (cart[id][0] <= 0) delete cart[id];
+          }
+
+          // delete icon on checkout
+          const removeBtn = e.target.closest(".remove-item");
+          if (removeBtn) {
+            const id = removeBtn.dataset.item;
+            delete cart[id];
+          }
+
+
+          saveCart();
+          updateNavbarCartUI();
+          updateCheckoutUI();
+          updatePopover();
+        });
+
+
+        /* =========================
+           CLEAR CART
+        ========================== */
+
+        window.clearCart = function () {
+          cart = {};
+          saveCart();
+          updateNavbarCartUI();
+          updateCheckoutUI();
+          popover.hide();
+        };
+
+
+        /* =========================
+           INITIAL LOAD
+        ========================== */
+
+        updateNavbarCartUI();
+        updateCheckoutUI();
+        updatePopover();
+
+      });
+      
+
+    </script>
+
+
+    {% endblock body %}

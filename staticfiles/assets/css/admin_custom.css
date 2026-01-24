@@ -1,0 +1,19 @@
+/* Force Jazzmin logo size override */
+img.brand-image, img.brand-image-xl {
+    height: 40px !important;   /* 👈 force height */
+    width: auto !important;    /* 👈 keep aspect ratio */
+    object-fit: contain !important;
+    max-height: 40px !important;
+}
+
+/* Optional: if the image is still too big in some themes */
+.brand-link .brand-image-xl {
+    height: 40px !important;
+    width: auto !important;
+}
+/* Force login page logo size */
+.login-logo img {
+    height: 80px !important;
+    width: auto !important;
+    object-fit: contain;
+}

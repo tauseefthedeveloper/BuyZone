@@ -1,0 +1,172 @@
+{% extends "delivery/base.html" %}
+{% load static %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block main %}
+<div class="container py-3">
+
+  <!-- ORDER SUMMARY -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0 fw-semibold">Order #{{ order.oid }}</h5>
+        <span class="badge 
+          {% if order.paymentstatus == 'Paid' %} bg-success
+          {% elif order.paymentstatus == 'Cancelled' %} bg-danger
+          {% else %} bg-warning text-dark
+          {% endif %}">
+          {{ order.paymentstatus }}
+        </span>
+      </div>
+
+      <hr>
+
+      <h6 class="text-muted mb-2">Customer</h6>
+
+      <p class="fw-semibold mb-1">{{ order.name }}</p>
+
+      <a href="tel:+91{{ order.phone }}" class="btn btn-sm btn-outline-primary mb-2">
+        📞 +91 {{ order.phone }}
+      </a>
+
+      <p class="text-muted small mb-2">
+        {{ order.address1 }}, {{ order.address2 }},
+        {{ order.city }}, {{ order.state }} - {{ order.zip_code }}
+      </p>
+
+      <div class="d-flex justify-content-between mt-2">
+        <span class="fw-semibold">Total</span>
+        <span class="fw-bold">₹{{ order.amount }}</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <h6 class="fw-semibold mb-3">Products</h6>
+
+      {% for pid, value in items.items %}
+      <div class="product-card mb-3">
+
+        <div class="product-img">
+          {% if images %}
+            {% for imgLink in images.values %}
+              <img src="{{ imgLink }}" alt="Product">
+            {% endfor %}
+          {% else %}
+            <div class="no-img">No Image</div>
+          {% endif %}
+        </div>
+
+        <div class="product-info">
+          <div class="fw-semibold">{{ value.1 }}</div>
+          <div class="small text-muted">Size: {{ value.5 }}</div>
+          <div class="small text-muted">Qty: {{ value.0 }}</div>
+
+          <div class="mt-1">
+            <span class="fw-bold">₹{{ value.2 }}</span>
+            <span class="text-muted text-decoration-line-through small ms-1">
+              {{ value.3 }}
+            </span>
+          </div>
+
+          <div class="text-success small">{{ value.4 }}</div>
+        </div>
+
+      </div>
+      {% empty %}
+        <p class="text-muted">No products found.</p>
+      {% endfor %}
+
+    </div>
+  </div>
+
+  <!-- DELIVERY UPDATES -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h6 class="fw-semibold mb-3">Delivery Updates</h6>
+
+      {% for u in updates %}
+      <div class="update-item mb-3">
+
+        <div class="small text-muted">{{ u.update_date }}</div>
+        <div class="fw-semibold">{{ u.update_desc }}</div>
+
+        {% if u.delivered %}
+          <span class="badge bg-success mt-1">Delivered</span>
+        {% endif %}
+
+      </div>
+      {% empty %}
+        <p class="text-muted">No updates yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<style>
+.card {
+  border-radius: 14px;
+}
+
+/* PRODUCT CARD */
+.product-card {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.product-card:last-child {
+  border-bottom: none;
+}
+
+.product-img img {
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.no-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  background: #f1f1f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.product-info {
+  flex: 1;
+}
+
+/* UPDATES */
+.update-item {
+  padding-left: 12px;
+  border-left: 3px solid #0d6efd;
+}
+
+/* MOBILE */
+@media (max-width: 576px) {
+  .product-card {
+    flex-direction: row;
+  }
+
+  h5, h6 {
+    font-size: 1rem;
+  }
+
+  .card-body {
+    padding: 14px;
+  }
+}
+</style>
+{% endblock %}

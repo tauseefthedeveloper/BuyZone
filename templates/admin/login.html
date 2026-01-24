@@ -1,0 +1,44 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+
+<style>
+.login-loader {
+  display: none;
+  margin-left: 8px;
+}
+
+.login-btn-loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const form = document.querySelector("form");
+  const loginBtn = form.querySelector("button[type='submit']");
+
+  if (!loginBtn) return;
+
+  const spinner = document.createElement("span");
+  spinner.className = "login-loader spinner-border spinner-border-sm";
+  spinner.setAttribute("role", "status");
+  spinner.setAttribute("aria-hidden", "true");
+
+  loginBtn.appendChild(spinner);
+
+  form.addEventListener("submit", function () {
+    loginBtn.classList.add("login-btn-loading");
+    spinner.style.display = "inline-block";
+    loginBtn.innerHTML = "Logging in… ";
+    loginBtn.appendChild(spinner);
+  });
+
+});
+</script>
+
+{% endblock %}

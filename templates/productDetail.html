@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+BuyZone | {{ product.product_name }}
+{% endblock title %}
+
+<div class="mt-5">
+    {% block content %}
+
+    <h3 data-aos="fade-up" class="text-white font-weight-bold text-center" style="width: 100%; font-weight: 800">
+        Welcome to Product details!
+    </h3>
+
+    {% endblock content %}
+</div>
+
+{% block body %}
+<div class="container my-5">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">BuyZone</h2>
+        <p class="text-muted">Product Details</p>
+    </div>
+
+    <!-- Product Layout -->
+    <div class="row g-4 bg-white shadow-sm rounded p-4">
+
+        <!-- LEFT : Image -->
+        <div class="col-12 col-md-6 text-center">
+            <div class="border rounded p-3">
+                <div class="img-display">
+                    <div class="img-showcase xzoom-container xzoom-custom">
+                        <!-- <img src="{{ product.image.url }}" class="xzoom img-fluid" xoriginal="{{ product.image.url }}"
+                            alt="product image" id="xzoom-default" /> -->
+                        <img src="{{ product.image.url }}" id="xzoom-default" class="xzoom img-fluid"
+                            xoriginal="{{ product.image.url }}"
+                            style="max-height:380px; object-fit:contain; cursor: zoom-in;"
+                            alt="{{ product.product_name }}" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT : Details -->
+        <div class="col-12 col-md-6">
+
+            <h3 class="fw-bold">{{ product.product_name }}</h3>
+            <p class="text-muted mb-2">Sold by <strong>BuyZone</strong></p>
+
+            <!-- Rating -->
+            <div class="mb-2">
+                {% for i in stars %}
+                <i class="fa-solid fa-star text-warning"></i>
+                {% endfor %}
+            </div>
+
+            <!-- Price -->
+            <h4 class="text-danger fw-bold my-3">₹ {{ product.price }}</h4>
+
+
+            <!-- Product Info -->
+            <h5 class="fw-bold">About this item</h5>
+            <p class="text-muted">{{ product.desc }}</p>
+
+            <ul class="list-group list-group-flush mt-3">
+                <li class="list-group-item px-0">
+                    <strong>Category:</strong> {{ product.category|title }}
+                </li>
+                <li class="list-group-item px-0">
+                    <strong>Sub-Category:</strong> {{ product.subcategory|title }}
+                </li>
+                <li class="list-group-item px-0">
+                    <strong>Shipping Fee:</strong>
+                    <span class="text-success">{{ product.ShippingFee }} Included in product price</span>
+                </li>
+                <li class="list-group px-0">
+                    <!-- Hidden info so JS can read like index page -->
+                    <span id="namepr{{product.id}}" hidden>{{ product.product_name }}</span>
+                    <span id="pricepr{{product.id}}" hidden>{{ product.price }}</span>
+                    <span id="oldpricepr{{product.id}}" hidden>{{ product.OldPrice }}</span>
+                    <span id="discountpr{{product.id}}" hidden>{{ product.Discount }}</span>
+
+                    <!-- ADD TO CART / PLUS-MINUS AREA -->
+                    <div id="divpr{{product.id}}" class="divpr mt-3">
+                        <button id="pr{{product.id}}" class="btn btn-danger w-100 cart">
+                            Add To Cart
+                        </button>
+                    </div>
+                </li>
+            </ul>
+
+
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        /* =========================
+           CART INITIALIZATION
+        ========================== */
+
+        let cart = localStorage.getItem("cart")
+            ? JSON.parse(localStorage.getItem("cart"))
+            : {};
+
+        const cartCount = document.getElementById("cart");
+        const popcart = document.getElementById("popcart");
+
+        const popover = new bootstrap.Popover(popcart, {
+            html: true,
+            trigger: "button",
+            sanitize: false,     // 🔥 REQUIRED for <button>
+            placement: "bottom",
+            content: "Your cart is empty"
+        });
+
+        updateCart(cart);
+
+        /* =========================
+           ADD TO CART
+        ========================== */
+
+        document.addEventListener("click", function (e) {
+            if (!e.target.classList.contains("cart")) return;
+
+            const id = e.target.id; // pr1, pr2
+            const name = document.getElementById("name" + id).innerText;
+            const price = document.getElementById("price" + id).innerText;
+            const oldPrice = document.getElementById("oldprice" + id).innerText;
+            const discount = document.getElementById("discount" + id).innerText;
+
+            if (cart[id]) {
+                cart[id][0]++;
+            } else {
+                cart[id] = [1, name, price, oldPrice, discount];
+            }
+
+            saveCart();
+            updatePopover();
+        });
+
+
+        /* =========================
+           PLUS / MINUS BUTTONS
+        ========================== */
+
+        document.addEventListener("click", function (e) {
+
+            if (e.target.classList.contains("plus")) {
+                const id = e.target.dataset.id;
+                cart[id][0]++;
+            }
+
+            if (e.target.classList.contains("minus")) {
+                const id = e.target.dataset.id;
+                cart[id][0]--;
+
+                // ✅ WHEN QTY BECOMES 0 → REMOVE ITEM & SHOW ADD TO CART
+                if (cart[id][0] <= 0) {
+                    delete cart[id];
+
+                    const div = document.getElementById("div" + id);
+                    if (div) {
+                        div.innerHTML = `
+                            <button id="${id}" class="btn btn-danger btn-sm w-100 cart">
+                                Add To Cart
+                            </button>
+                            `;
+                    }
+                }
+            }
+
+            saveCart();
+            updatePopover();
+        });
+
+        /* =========================
+           UPDATE CART UI
+        ========================== */
+
+        function updateCart(cart) {
+            let totalQty = 0;
+
+            for (let item in cart) {
+                totalQty += cart[item][0];
+
+                const div = document.getElementById("div" + item);
+                if (!div) continue;
+
+                div.innerHTML = `
+                    <button class="btn btn-success btn-sm minus" data-id="${item}">−</button>
+                    <span class="mx-2">${cart[item][0]}</span>
+                    <button class="btn btn-success btn-sm plus" data-id="${item}">+</button>
+                    <a href="/checkout/?itemsJson=${encodeURIComponent(JSON.stringify(cart))}" class="btn btn-success btn-sm">Checkout</a>
+                `;
+                div.style.display = "flex";
+                div.style.justifyContent = "space-between";
+                div.style.alignItems = "center";
+            }
+
+            cartCount.innerText = totalQty;
+        }
+
+        /* =========================
+           UPDATE POPOVER
+        ========================== */
+        function updatePopover() {
+
+            let html = `<h6>Your Cart</h6><div class="mb-2">`;
+            let i = 1;
+            let hasItems = false;
+
+            for (let item in cart) {
+                if (cart[item][0] > 0) {
+                    hasItems = true;
+                    html += `<b>${i}.</b> ${cart[item][1].slice(0, 20)}
+        (<b>${cart[item][0]}</b>)<br>`;
+                    i++;
+                }
+            }
+
+            if (!hasItems) {
+                popover.hide();
+                return;
+            }
+
+            html += `
+          </div>
+          <a href="/checkout/?itemsJson=${encodeURIComponent(JSON.stringify(cart))}" 
+            class="btn btn-success btn-sm">Checkout</a>
+          <button class="btn btn-danger btn-sm ms-2" onclick="clearCart()">Clear</button>
+      `;
+
+            popover.setContent({ ".popover-body": html });
+            popover.show();
+        }
+
+
+
+        /* =========================
+           SAVE CART
+        ========================== */
+
+        function saveCart() {
+            localStorage.setItem("cart", JSON.stringify(cart));
+            updateCart(cart);
+        }
+
+        /* =========================
+           CLEAR CART (GLOBAL)
+        ========================== */
+
+        window.clearCart = function () {
+            cart = {};
+            localStorage.removeItem("cart");
+            cartCount.innerText = "0";
+            popover.hide();
+
+            document.querySelectorAll(".divpr").forEach(div => {
+                const id = div.id.replace("div", "");
+                div.innerHTML = `
+        <button id="${id}" style="width:100%;" class="btn btn-danger btn-sm cart">
+          Add To Cart
+        </button>
+      `;
+            });
+        };
+
+        document.querySelectorAll(".view-image").forEach(button => {
+            button.addEventListener("click", function () {
+
+                const imageUrl = this.dataset.image;
+                const productName = this.dataset.name;
+
+                const modalImage = document.getElementById("modalImage");
+                const modalTitle = document.getElementById("imageModalLabel");
+
+                modalTitle.textContent = productName;
+                modalImage.src = imageUrl;
+
+            });
+        });
+
+
+
+    });
+</script>
+
+
+{% endblock body %}

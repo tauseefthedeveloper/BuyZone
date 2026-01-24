@@ -1,0 +1,177 @@
+{% extends "delivery/base.html" %}
+
+{% block title %}Delivery Dashboard{% endblock %}
+
+{% block main %}
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="greet">
+    Hi {{ user.first_name }} {{ user.last_name }}!
+    <span class="text-muted small d-block">Let’s complete today’s deliveries</span>
+    <span class="text-muted small d-block mt-1">
+      Verify customer identity and payment before delivery
+    </span>
+  </div>
+
+  <span class="badge bg-primary rounded-pill">
+    {{ orders|length }} Active Orders
+  </span>
+</div>
+
+<h4 class="fw-bold mb-3 text-center">Delivery Dashboard</h4>
+
+<!-- ================= DESKTOP TABLE ================= -->
+<div class="card shadow-sm p-3 d-none d-lg-block">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Order ID</th>
+          <th>Products</th>
+          <th>Customer</th>
+          <th>Address</th>
+          <th>Payment</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="fw-bold text-primary">
+            <a href="{% url 'orderDetails' o.oid %}">{{ o.oid }}</a>
+          </td>
+
+          <td style="min-width:260px">
+            {% for pid, item in o.items.items %}
+              {% with qty=item.0 name=item.1 price=item.2 size=item.5 %}
+              <div class="p-2 mb-2 border rounded bg-light">
+                <div class="fw-semibold">{{ name }}</div>
+                <small class="text-muted">Qty: {{ qty }}</small>
+                {% if size %}
+                  <small class="text-muted d-block">Size: {{ size }}</small>
+                {% endif %}
+                <div class="fw-bold text-success">₹{{ price }}</div>
+              </div>
+              {% endwith %}
+            {% endfor %}
+          </td>
+
+          <td>
+            <strong>{{ o.name }}</strong><br>
+            <a href="tel:+91{{ o.phone }}" class="text-decoration-none">
+              {{ o.phone }}
+            </a>
+          </td>
+
+          <td class="small">
+            {{ o.address1 }} {{ o.address2 }}<br>
+            {{ o.city }}, {{ o.state }} - {{ o.zip_code }}
+          </td>
+
+          <td>
+            {% if o.amountpaid == 0 %}
+              <span class="badge bg-warning text-dark">Cash on Delivery</span>
+            {% else %}
+              <span class="badge bg-success">Online Paid</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <a href="{% url 'generate_delivery_otp' o.id %}"
+               class="btn btn-primary btn-sm action-btn"
+               data-loader="deliver-loader-{{ o.id }}"
+               onclick="handleAction(this)">
+              Deliver
+            </a>
+
+            <button id="deliver-loader-{{ o.id }}"
+                    class="btn btn-primary btn-sm d-none" disabled>
+              <span class="spinner-grow spinner-grow-sm"></span>
+              Generating OTP
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if orders|length == 0 %}
+      <p class="text-center text-muted">No orders assigned</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ================= MOBILE CARDS ================= -->
+<div class="d-lg-none">
+  {% for o in orders %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between mb-2">
+        <strong class="text-primary">{{ o.oid }}</strong>
+        {% if o.amountpaid == 0 %}
+          <span class="badge bg-warning text-dark">COD</span>
+        {% else %}
+          <span class="badge bg-success">Paid</span>
+        {% endif %}
+      </div>
+
+      <div class="mb-2">
+        {% for pid, item in o.items.items %}
+          {% with qty=item.0 name=item.1 size=item.5 %}
+          <div class="border rounded p-2 mb-2 bg-light">
+            <div class="fw-semibold">{{ name }}</div>
+            <small class="text-muted">Qty: {{ qty }}</small>
+            {% if size %}
+              <small class="text-muted d-block">Size: {{ size }}</small>
+            {% endif %}
+          </div>
+          {% endwith %}
+        {% endfor %}
+      </div>
+
+      <div class="mb-2">
+        <strong>{{ o.name }}</strong><br>
+        <a href="tel:+91{{ o.phone }}" class="text-decoration-none">
+          {{ o.phone }}
+        </a>
+      </div>
+
+      <div class="small text-muted mb-3">
+        {{ o.address1 }} {{ o.address2 }},
+        {{ o.city }}, {{ o.state }} - {{ o.zip_code }}
+      </div>
+
+      <a href="{% url 'generate_delivery_otp' o.id %}"
+         class="btn btn-primary w-100 action-btn"
+         data-loader="deliver-loader-m-{{ o.id }}"
+         onclick="handleAction(this)">
+        Deliver Order
+      </a>
+
+      <button id="deliver-loader-m-{{ o.id }}"
+              class="btn btn-primary w-100 d-none mt-2" disabled>
+        <span class="spinner-grow spinner-grow-sm"></span>
+        Generating OTP
+      </button>
+
+    </div>
+  </div>
+  {% empty %}
+    <p class="text-center text-muted">No orders assigned</p>
+  {% endfor %}
+</div>
+
+<!-- GLOBAL JS -->
+<script>
+function handleAction(btn) {
+  const loader = document.getElementById(btn.dataset.loader);
+  if (!loader) return;
+  btn.classList.add("d-none");
+  loader.classList.remove("d-none");
+}
+</script>
+
+{% endblock %}

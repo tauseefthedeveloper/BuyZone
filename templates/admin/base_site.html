@@ -1,0 +1,103 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+
+<style>
+/* ===== Global Admin Loader ===== */
+#admin-loader {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.75);
+  z-index: 99999;
+  display: none;
+}
+
+#admin-loader .spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: 600;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  /* ❌ Do not apply loader on login page */
+  if (document.body.classList.contains("login")) {
+    return;
+  }
+
+  /* Create loader */
+  const loader = document.createElement("div");
+  loader.id = "admin-loader";
+  loader.innerHTML = `
+    <div class="spinner">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden"></span>
+      </div>
+    </div>
+`;
+  document.body.appendChild(loader);
+
+  function showLoader() {
+    loader.style.display = "block";
+  }
+
+  function hideLoader() {
+    loader.style.display = "none";
+  }
+
+  /* ✅ Always hide loader when page finishes loading */
+  window.addEventListener("load", hideLoader);
+  window.addEventListener("pageshow", hideLoader); // back/forward fix
+
+  /* ✅ Show loader on form submit (save, refund, assign) */
+  document.querySelectorAll("form").forEach(form => {
+    form.addEventListener("submit", () => {
+      showLoader();
+    });
+  });
+
+  /* ✅ Smart navigation handling */
+  document.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", function () {
+
+      const href = link.getAttribute("href");
+
+      /* ❌ Ignore JS / fake links */
+      if (
+        !href ||
+        href === "#" ||
+        href.startsWith("javascript:")
+      ) {
+        return;
+      }
+
+      /* ❌ Ignore profile / dropdown menu */
+      if (
+        link.closest("#user-tools") ||
+        link.closest(".usermenu") ||
+        link.closest(".dropdown-menu")
+      ) {
+        return;
+      }
+
+      /* ❌ Ignore new tab */
+      if (link.target === "_blank") {
+        return;
+      }
+
+      /* ✅ Real navigation */
+      showLoader();
+    });
+  });
+
+});
+</script>
+
+{% endblock %}
