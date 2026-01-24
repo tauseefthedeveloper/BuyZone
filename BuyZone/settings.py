@@ -49,7 +49,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'BuyZone.urls'
 WSGI_APPLICATION = 'BuyZone.wsgi.application'
-
+ASGI_APPLICATION = 'BuyZone.asgi.application'
 # ======================
 # TEMPLATES
 # ======================
