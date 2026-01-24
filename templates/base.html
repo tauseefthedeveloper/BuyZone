@@ -61,7 +61,7 @@
     </a>
 
     <!-- Search -->
-    <form action="{% url 'search' %}" method="GET"
+    <form  id="desktopSearchForm" action="{% url 'search' %}" method="GET"
       class="d-none d-md-flex flex-grow-1 position-relative">
 
       <input type="text" name="q" id="searchInput"
@@ -116,7 +116,8 @@
 
         <li><a href="/contact/" class="nav-link">Contact</a></li>
         <div class="d-md-none px-3 py-2 position-relative">
-          <form action="{% url 'search' %}" method="GET">
+
+          <form id="mobileSearchForm" action="{% url 'search' %}" method="GET">
             <input type="text"
                   id="searchInputMobile"
                   name="q"
@@ -125,8 +126,10 @@
                   autocomplete="off">
           </form>
 
-          <div id="liveSearchResultsMobile" class="mt-2 d-none"></div>
+          <div id="liveSearchResultsMobile" class="d-none mt-2"></div>
+
         </div>
+
       </ul>
     </nav>
 
@@ -381,63 +384,71 @@
       }
     });
   </script>
-  <script>
-document.addEventListener('DOMContentLoaded', function () {
 
-  const mobileInput = document.getElementById('searchInputMobile');
-  const mobileResults = document.getElementById('liveSearchResultsMobile');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-  if (!mobileInput || !mobileResults) return;
+  const searchInputMobile = document.getElementById('searchInputMobile');
+  const resultsContainerMobile = document.getElementById('liveSearchResultsMobile');
+  const mobileForm = document.getElementById('mobileSearchForm');
 
-  let debounceTimer;
+  if (!searchInputMobile || !resultsContainerMobile || !mobileForm) return;
 
-  mobileInput.addEventListener('input', function () {
-    clearTimeout(debounceTimer);
+  /* 🚫 STOP FORM SUBMIT (THIS IS THE KEY FIX) */
+  mobileForm.addEventListener('submit', function (e) {
+    e.preventDefault();              // ⛔ stop redirect
+    searchInputMobile.dispatchEvent(new Event('input')); // 🔁 reuse same logic
+  });
 
+  /* 🔁 EXACT SAME LOGIC AS DESKTOP */
+  searchInputMobile.addEventListener('input', function () {
     const query = this.value.trim();
 
-    // Only search after word completion
-    if (query.length < 3) {
-      mobileResults.classList.add('d-none');
-      return;
-    }
-
-    debounceTimer = setTimeout(() => {
+    if (query.length > 1) {
       fetch(`/search/?q=${encodeURIComponent(query)}`, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
 
-        let html = '';
+        let html = "";
 
-        if (data.results && data.results.length > 0) {
-          html += '<ul>';
+        if (data.results.length > 0) {
+          html += `<ul class="list-unstyled">`;
+
           data.results.forEach(item => {
             html += `
-              <li>
-                <a href="/productDetails/${item.id}/">
+              <li class="list-group-item px-0">
+                <a href="/productDetails/${item.id}/"
+                   style="font-size:14px"
+                   class="text-decoration-none">
                   ${item.product_name}
                 </a>
               </li>
             `;
           });
-          html += '</ul>';
+
+          html += `</ul>`;
         } else {
-          html = '<div class="text-muted small">No results found</div>';
+          html = `<div class="text-muted small">No results found</div>`;
         }
 
-        mobileResults.innerHTML = html;
-        mobileResults.classList.remove('d-none');
+        resultsContainerMobile.innerHTML = html;
+        resultsContainerMobile.classList.remove('d-none');
+        resultsContainerMobile.style.display = 'block';
       });
-
-    }, 600); // ⏳ wait until user stops typing
+    } else {
+      resultsContainerMobile.style.display = 'none';
+    }
   });
 
-  // Close results when clicking outside
-  document.addEventListener('click', function (e) {
-    if (!mobileInput.contains(e.target) && !mobileResults.contains(e.target)) {
-      mobileResults.classList.add('d-none');
+  /* Hide on outside click */
+  document.addEventListener('click', (e) => {
+    if (
+      !searchInputMobile.contains(e.target) &&
+      !resultsContainerMobile.contains(e.target)
+    ) {
+      resultsContainerMobile.style.display = 'none';
     }
   });
 

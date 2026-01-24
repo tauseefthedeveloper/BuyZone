@@ -1,2 +1,2 @@
-20. Also improve the ui of the admin page
-21. Testing all the modeule that will work correct show correct info to admin and user
+22. Working with search funtionality and also improving the ui
+23. Add preloader on delivery boy module
