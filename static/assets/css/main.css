@@ -2755,3 +2755,87 @@ option:disabled {
 .navmenu a::after {
   display: none !important;
 }
+
+/* Header enhancements */
+.header {
+  transition: all 0.3s ease;
+}
+
+.header.scrolled {
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* Nav hover effect */
+.navmenu .nav-link {
+  position: relative;
+}
+
+.navmenu .nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: var(--accent-color);
+  transition: width 0.3s ease;
+}
+
+.navmenu .nav-link:hover::after,
+.navmenu .nav-link.active::after {
+  width: 100%;
+}
+
+/* Remove bootstrap caret */
+.dropdown-toggle::after {
+  display: none !important;
+}
+/* Hero height control */
+.hero {
+  min-height: 90vh;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 75vh;
+  }
+}
+
+/* Ensure proper stacking */
+.hero .z-2 {
+  z-index: 2;
+}
+
+
+
+/* Mobile search results – clean & transparent */
+#liveSearchResultsMobile {
+  background: transparent;
+  border: none;
+}
+
+#liveSearchResultsMobile ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#liveSearchResultsMobile li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+#liveSearchResultsMobile li:last-child {
+  border-bottom: none;
+}
+
+#liveSearchResultsMobile a {
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+}
+
+#liveSearchResultsMobile a:hover {
+  color: var(--accent-color);
+}
