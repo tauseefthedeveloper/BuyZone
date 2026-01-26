@@ -190,7 +190,7 @@ h6 {
     padding: 0;
   }
 
-  .navmenu ul {
+  .navmenu ul:not(.list-unstyled) {
     margin: 0;
     padding: 0;
     display: flex;
@@ -338,7 +338,7 @@ h6 {
     z-index: 9997;
   }
 
-  .navmenu ul {
+  .navmenu ul:not(.list-unstyled) {
     display: none;
     list-style: none;
     position: absolute;
@@ -2811,62 +2811,19 @@ option:disabled {
 
 /* Mobile search results – clean & transparent */
 #liveSearchResultsMobile {
-  background: transparent;
-  border: none;
-}
-
-#liveSearchResultsMobile ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#liveSearchResultsMobile li {
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-#liveSearchResultsMobile li:last-child {
-  border-bottom: none;
+  background: white;
+  width:100%;
 }
 
 #liveSearchResultsMobile a {
   font-size: 14px;
   color: #333;
   text-decoration: none;
+  display:block;
+  text-overflow:ellipsis;
+  overflow:hidden;
 }
 
 #liveSearchResultsMobile a:hover {
   color: var(--accent-color);
-}
-/* === MOBILE SEARCH RESULT FIX === */
-#liveSearchResultsMobile {
-  position: relative;
-  z-index: 9999;
-  overflow: visible !important;
-}
-
-#liveSearchResultsMobile ul {
-  margin: 0;
-  padding: 0;
-}
-
-#liveSearchResultsMobile li {
-  list-style: none;
-  padding: 6px 0;
-}
-
-#liveSearchResultsMobile a {
-  display: block;
-  color: #000;
-  font-size: 14px;
-}
-/* FORCE MOBILE SEARCH RESULTS TO SHOW */
-#liveSearchResultsMobile {
-  position: fixed !important;
-  left: 0;
-  right: 0;
-  top: 64px;          /* adjust if header height differs */
-  z-index: 99999 !important;
-  background: transparent;
 }

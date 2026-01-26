@@ -27,11 +27,6 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  /* ❌ Do not apply loader on login page */
-  if (document.body.classList.contains("login")) {
-    return;
-  }
-
   /* Create loader */
   const loader = document.createElement("div");
   loader.id = "admin-loader";
@@ -70,15 +65,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const href = link.getAttribute("href");
 
       /* ❌ Ignore JS / fake links */
-      if (
-        !href ||
-        href === "#" ||
-        href.startsWith("javascript:")
-      ) {
-        return;
-      }
+      /* ❌ Ignore invalid links */
+      if (!href || href === "#" || href.startsWith("javascript:")) return;
 
-      /* ❌ Ignore profile / dropdown menu */
+      if (href.startsWith("#")) return;
+      
       if (
         link.closest("#user-tools") ||
         link.closest(".usermenu") ||

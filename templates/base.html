@@ -61,7 +61,7 @@
     </a>
 
     <!-- Search -->
-    <form  id="desktopSearchForm" action="{% url 'search' %}" method="GET"
+    <form  id="desktopSearchForm" method="GET"
       class="d-none d-md-flex flex-grow-1 position-relative">
 
       <input type="text" name="q" id="searchInput"
@@ -126,7 +126,10 @@
                   autocomplete="off">
           </form>
 
-          <div id="liveSearchResultsMobile" class="d-none mt-2"></div>
+          <div id="liveSearchResultsMobile" style="
+          border-radius: 5px;
+          border: 0.1px solid black;
+          " class="d-none mt-2"></div>
 
         </div>
 
@@ -323,6 +326,12 @@
     document.addEventListener('DOMContentLoaded', () => {
       const searchInput = document.getElementById('searchInput');
       const resultsContainer = document.getElementById('liveSearchResults');
+      const desktopForm = document.getElementById("desktopSearchForm");
+
+      desktopForm.addEventListener('submit', function (e) {
+        e.preventDefault();              // ⛔ stop redirect
+        searchInput.dispatchEvent(new Event('input')); // 🔁 reuse same logic
+      });
 
       searchInput.addEventListener('input', function () {
         const query = this.value.trim();
@@ -403,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* 🔁 EXACT SAME LOGIC AS DESKTOP */
   searchInputMobile.addEventListener('input', function () {
     const query = this.value.trim();
+    searchInputMobile.style.display = "block";
 
     if (query.length > 1) {
       fetch(`/search/?q=${encodeURIComponent(query)}`, {
@@ -414,23 +424,24 @@ document.addEventListener('DOMContentLoaded', () => {
         let html = "";
 
         if (data.results.length > 0) {
-          html += `<ul class="list-unstyled">`;
+          html += `<div class="list-unstyled">`;
 
           data.results.forEach(item => {
             html += `
-              <li class="list-group-item px-0">
+              <div class="list-group-item px-0">
                 <a href="/productDetails/${item.id}/"
                    style="font-size:14px"
                    class="text-decoration-none">
                   ${item.product_name}
                 </a>
-              </li>
+              </div>
             `;
           });
 
-          html += `</ul>`;
+          html += `</div>`;
         } else {
-          html = `<div class="text-muted small">No results found</div>`;
+          html = `<div class="text-muted small" style="
+          padding: 10px 20px;">No results found</div>`;
         }
 
         resultsContainerMobile.innerHTML = html;

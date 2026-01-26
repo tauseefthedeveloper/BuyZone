@@ -154,6 +154,19 @@
         border-radius: 12px;
       }
     }
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    #page-loader.show {
+      display: flex;
+    }
   </style>
 </head>
 
@@ -237,5 +250,55 @@
       }
     });
   </script>
+  <div id="page-loader">
+    <div class="spinner-border text-primary" role="status"></div>
+  </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+
+  const loader = document.getElementById("page-loader");
+  if (!loader) return;
+
+  function showLoader() {
+    loader.classList.add("show");
+  }
+
+  function hideLoader() {
+    loader.classList.remove("show");
+  }
+
+  /* Always hide loader on load / back */
+  window.addEventListener("load", hideLoader);
+  window.addEventListener("pageshow", hideLoader);
+
+  /* Show loader on link click */
+  document.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", function (e) {
+
+      const href = link.getAttribute("href");
+
+      /* Ignore invalid / fake links */
+      if (!href || href === "#" || href.startsWith("javascript:")) return;
+
+      /* Ignore sidebar toggle buttons */
+      if (link.closest("#sidebar") && link.hasAttribute("id")) return;
+
+      /* Ignore new tab */
+      if (link.target === "_blank") return;
+
+      showLoader();
+    });
+  });
+
+  /* Show loader on form submit (future-proof) */
+  document.querySelectorAll("form").forEach(form => {
+    form.addEventListener("submit", () => {
+      showLoader();
+    });
+  });
+
+});
+</script>
+
 </body>
 </html>

@@ -191,7 +191,7 @@ h6 {
     padding: 0;
   }
 
-  .navmenu ul {
+  .navmenu ul:not(.list-unstyled) {
     margin: 0;
     padding: 0;
     display: flex;
@@ -339,7 +339,7 @@ h6 {
     z-index: 9997;
   }
 
-  .navmenu ul {
+  .navmenu ul:not(.list-unstyled) {
     display: none;
     list-style: none;
     position: absolute;

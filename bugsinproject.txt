@@ -1,2 +1,1 @@
-22. Working with search funtionality and also improving the ui
-23. Add preloader on delivery boy module
+24. Testing of all modules
