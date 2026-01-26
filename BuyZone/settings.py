@@ -107,6 +107,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'tauseefkhan3738@gmail.com'
 EMAIL_HOST_PASSWORD = 'xcrmhxbwtbtibjaq'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_TIMEOUT = 10
 
 # ======================
 # STATIC & MEDIA
