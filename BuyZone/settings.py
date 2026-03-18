@@ -108,7 +108,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'apikey'
-EMAIL_HOST_PASSWORD = ''  # 👈 tera API key
+
+EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY')
 
 DEFAULT_FROM_EMAIL = 'tauseefkhan3738@gmail.com'
 
