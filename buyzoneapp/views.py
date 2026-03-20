@@ -726,7 +726,10 @@ def cancel_order(request, order_id):
     )
 
     email.attach_alternative(html_message, "text/html")
-    email.send()
+    # email.send()
+    import threading
+    from helper import send_email_async
+    threading.Thread(target=send_email_async).start()
 
 
     messages.success(request, f"Order #{order.oid} cancelled successfully")
