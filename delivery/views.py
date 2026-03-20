@@ -122,7 +122,7 @@ def generate_delivery_otp(request, order_id):
         <!-- Footer -->
         <tr>
         <td style="background-color:#f8f9fa; padding:15px; text-align:center; font-size:12px; color:#6c757d;">
-        © 2025 BuyZone. All rights reserved.
+        © 2026 BuyZone. All rights reserved.
         </td>
         </tr>
 
@@ -142,10 +142,10 @@ def generate_delivery_otp(request, order_id):
     email = EmailMultiAlternatives(
             subject=subject,
             body=text_message,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             to=[order.email]
     )
-
+    
     email.attach_alternative(html_message, "text/html")
     email.send()
 
@@ -248,7 +248,7 @@ def verify_delivery_otp(request, order_id):
                 <!-- Footer -->
                 <tr>
                 <td style="background-color:#f8f9fa; padding:15px; text-align:center; font-size:12px; color:#6c757d;">
-                © 2025 BuyZone. All rights reserved.
+                © 2026 BuyZone. All rights reserved.
                 </td>
                 </tr>
 
@@ -268,7 +268,7 @@ def verify_delivery_otp(request, order_id):
             email = EmailMultiAlternatives(
                 subject=subject,
                 body=text_message,
-                from_email=settings.EMAIL_HOST_USER,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[order.email]
             )
 

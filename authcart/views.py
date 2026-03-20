@@ -148,7 +148,7 @@ def signup(request):
         email_message = EmailMessage(
             subject,
             message,
-            settings.EMAIL_HOST_USER,
+            settings.DEFAULT_FROM_EMAIL,
             [emails],
         )
 
@@ -304,7 +304,7 @@ class RequestResetEmailView(View):
                         <!-- Footer -->
                         <tr>
                         <td style="background:#f8f9fa; padding:12px; text-align:center; font-size:12px; color:#6c757d;">
-                            © 2025 BuyZone. All rights reserved.
+                            © 2026 BuyZone. All rights reserved.
                         </td>
                         </tr>
 
@@ -322,7 +322,7 @@ class RequestResetEmailView(View):
             email_message = EmailMessage(
                 subject="Reset Your BuyZone Password",
                 body=message,
-                from_email=settings.EMAIL_HOST_USER,
+                from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[email],
             )
             email_message.content_subtype = "html"  # IMPORTANT

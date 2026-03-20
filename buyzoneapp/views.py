@@ -721,7 +721,7 @@ def cancel_order(request, order_id):
     email = EmailMultiAlternatives(
         subject=subject,
         body="Your order has been cancelled successfully.",
-        from_email=settings.EMAIL_HOST_USER,
+        from_email=settings.DEFAULT_FROM_EMAIL,
         to=[order.email]
     )
 

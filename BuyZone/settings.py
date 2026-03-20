@@ -1,6 +1,10 @@
 from pathlib import Path
-import os
 from django.contrib import messages
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -100,7 +104,6 @@ USE_TZ = True
 # ======================
 # EMAIL
 # ======================
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_HOST = 'smtp.sendgrid.net'
@@ -111,7 +114,7 @@ EMAIL_HOST_USER = 'apikey'
 
 EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY')
 
-DEFAULT_FROM_EMAIL = 'tauseefkhan3738@gmail.com'
+DEFAULT_FROM_EMAIL = 'tauseef.buyzone@outlook.com'
 
 # ======================
 # STATIC & MEDIA
