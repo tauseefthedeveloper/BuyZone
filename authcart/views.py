@@ -153,7 +153,10 @@ def signup(request):
         )
 
         email_message.content_subtype = "html"
-        email_message.send(fail_silently=False)
+        import threading
+        from helper import send_email_async
+        threading.Thread(target=send_email_async).start()
+        #email_message.send(fail_silently=False)
 
         messages.success(
             request,
@@ -326,7 +329,10 @@ class RequestResetEmailView(View):
                 to=[email],
             )
             email_message.content_subtype = "html"  # IMPORTANT
-            email_message.send()
+            #email_message.send()
+            import threading
+            from helper import send_email_async
+            threading.Thread(target=send_email_async).start()
 
             messages.success(
                 request,
