@@ -155,8 +155,7 @@ def signup(request):
         email_message.content_subtype = "html"
         import threading
         from helper import send_email_async
-        threading.Thread(target=send_email_async).start()
-        #email_message.send(fail_silently=False)
+        threading.Thread(target=send_email_async, args=(email_message,)).start()
 
         messages.success(
             request,
@@ -328,11 +327,10 @@ class RequestResetEmailView(View):
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[email],
             )
-            email_message.content_subtype = "html"  # IMPORTANT
-            #email_message.send()
+            email_message.content_subtype = "html" 
             import threading
             from helper import send_email_async
-            threading.Thread(target=send_email_async).start()
+            threading.Thread(target=send_email_async, args=(email_message,)).start()
 
             messages.success(
                 request,
