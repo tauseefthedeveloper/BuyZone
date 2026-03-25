@@ -147,9 +147,7 @@ def generate_delivery_otp(request, order_id):
     )
     
     email.attach_alternative(html_message, "text/html")
-    import threading
-    from helper import send_email_async
-    threading.Thread(target=send_email_async, args=(email,)).start()
+    email.send(fail_silently=False)
 
     messages.success(request, "OTP sent to customer email")
     return redirect("verify_delivery_otp", order_id=order.id)
@@ -288,9 +286,7 @@ def verify_delivery_otp(request, order_id):
                 mimetype="application/pdf"
             )
 
-            import threading
-            from helper import send_email_async
-            threading.Thread(target=send_email_async, args=(email,)).start()
+            email.send(fail_silently=False)
 
 
             
