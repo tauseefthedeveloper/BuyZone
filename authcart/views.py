@@ -8,6 +8,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.views.generic import View
 from django.contrib.auth import login,logout,authenticate
+
 from .utils import TokenGenerator,generate_token
 # from django.utils.encoding import force_text
 from django.utils.encoding import DjangoUnicodeDecodeError
@@ -44,7 +45,7 @@ def signup(request):
         # Generate activation link
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = generate_token.make_token(user)
-        activation_link = f"http://127.0.0.1:8000/auth/activate/{uid}/{token}/"
+        activation_link = f"https://buyzone-jrtq.onrender.com/auth/activate/{uid}/{token}/"
         # complete_activation_link=mark_safe(f"Activate your account by clicking the link <a target='_blank' href='{activation_link}'>click here!</a>")
         # Show activation link in a success message
 
@@ -225,7 +226,7 @@ class RequestResetEmailView(View):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = PasswordResetTokenGenerator().make_token(user)
 
-            reset_link = f"http://127.0.0.1:8000/auth/set-new-password/{uid}/{token}/"
+            reset_link = f"https://buyzone-jrtq.onrender.com/auth/set-new-password/{uid}/{token}/"
 
             message = f"""
                 <!DOCTYPE html>
