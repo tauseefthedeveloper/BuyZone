@@ -327,7 +327,9 @@ class RequestResetEmailView(View):
                 to=[email],
             )
             email_message.content_subtype = "html" 
+            print("Email function called")
             email_message.send(fail_silently=False)
+            print("Email sent successfully")
 
             messages.success(
                 request,
