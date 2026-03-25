@@ -1,5 +1,6 @@
 import json
 import random
+import threading
 from django.shortcuts import render, redirect, get_object_or_404
 from buyzoneapp.models import Orders, OrderUpdate
 from django.contrib import messages
@@ -9,6 +10,8 @@ from django.utils import timezone
 from django.core.mail import EmailMultiAlternatives
 from django.utils.timezone import localdate
 from django.db.models import Sum
+
+from helper import send_email_async
 from .models import DeliveryOTP
 from buyzoneapp.models import Orders, OrderUpdate, Product
 from django.db.models import OuterRef, Exists, Q
@@ -147,7 +150,7 @@ def generate_delivery_otp(request, order_id):
     )
     
     email.attach_alternative(html_message, "text/html")
-    email.send(fail_silently=False)
+    threading.Thread(target=send_email_async, args=(email,)).start()
 
     messages.success(request, "OTP sent to customer email")
     return redirect("verify_delivery_otp", order_id=order.id)
@@ -286,7 +289,7 @@ def verify_delivery_otp(request, order_id):
                 mimetype="application/pdf"
             )
 
-            email.send(fail_silently=False)
+            threading.Thread(target=send_email_async, args=(email,)).start()
 
 
             

@@ -1,7 +1,10 @@
 import email
+import threading
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, get_object_or_404 
 from django.contrib import messages
+
+from helper import send_email_async
 from .models import Orders, OrderUpdate, Product, Contact, ProductVariant
 from razorpay.errors import SignatureVerificationError
 from django.conf import settings
@@ -726,7 +729,7 @@ def cancel_order(request, order_id):
     )
 
     email.attach_alternative(html_message, "text/html")
-    email.send(fail_silently=False)
+    threading.Thread(target=send_email_async, args=(email,)).start()
 
 
     messages.success(request, f"Order #{order.oid} cancelled successfully")

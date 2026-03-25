@@ -1,3 +1,5 @@
+import threading
+
 from django.shortcuts import render,redirect,HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -8,6 +10,8 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.views.generic import View
 from django.contrib.auth import login,logout,authenticate
+
+from helper import send_email_async
 
 from .utils import TokenGenerator,generate_token
 # from django.utils.encoding import force_text
@@ -154,7 +158,7 @@ def signup(request):
         )
 
         email_message.content_subtype = "html"
-        email_message.send(fail_silently=False)
+        threading.Thread(target=send_email_async, args=(email_message,)).start()
 
         messages.success(
             request,
@@ -327,9 +331,8 @@ class RequestResetEmailView(View):
                 to=[email],
             )
             email_message.content_subtype = "html" 
-            print("Email function called")
-            email_message.send(fail_silently=False)
-            print("Email sent successfully")
+            
+            threading.Thread(target=send_email_async, args=(email_message,)).start()
 
             messages.success(
                 request,
