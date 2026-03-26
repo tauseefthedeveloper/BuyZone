@@ -1,3 +1,4 @@
+import os
 import threading
 
 from django.shortcuts import render,redirect,HttpResponse
@@ -331,7 +332,6 @@ class RequestResetEmailView(View):
                 to=[email],
             )
             email_message.content_subtype = "html" 
-            
             threading.Thread(target=send_email_async, args=(email_message,)).start()
 
             messages.success(
